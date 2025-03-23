@@ -39,6 +39,9 @@ public class SocialMediaController {
         app.post("/register", this::postRegisterHandler);
         app.post("/login", this::postLoginHandler);
         app.post("/messages", this::postMessageHandler);
+        app.get("/messages", this::getAllMessageHandler);
+        app.get("/messages/{message_id}", this::getMessageByIdHandler);
+
 
         return app;
     }
@@ -85,6 +88,19 @@ public class SocialMediaController {
             context.status(400);
         } else {
             context.json(mapper.writeValueAsString(createdMessage));
+        }
+
+    }
+    private void getAllMessageHandler(Context context) {
+        context.json(messageService.getAllMessages());
+    }
+    private void getMessageByIdHandler(Context context) {
+        int messageID = Integer.parseInt(context.pathParam("message_id"));
+        Message message = messageService.getAllMessagesById(messageID);
+        if (message != null) {
+            context.json(message);
+        } else {
+            context.status(200);
         }
 
     }
