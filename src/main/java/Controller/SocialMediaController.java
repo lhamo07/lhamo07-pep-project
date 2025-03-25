@@ -41,6 +41,10 @@ public class SocialMediaController {
         app.post("/messages", this::postMessageHandler);
         app.get("/messages", this::getAllMessageHandler);
         app.get("/messages/{message_id}", this::getMessageByIdHandler);
+        app.delete("/messages/{message_id}", this::deleteMessageByMessageIdHandler);
+        app.patch("/messages/{message_id}", this::updateMessageByMessageIdHandler);
+        app.get("/accounts/{account_id}/messages", this::getAllMessagesByParticularUser);
+
 
 
         return app;
@@ -83,7 +87,7 @@ public class SocialMediaController {
         ObjectMapper mapper = new ObjectMapper();
         Message message = mapper.readValue(context.body(), Message.class);
         Message createdMessage = messageService.createMessage(message);
-        System.out.println("createdMessage" + createdMessage);
+        System.out.println("created Message" + createdMessage);
         if (createdMessage == null) {
             context.status(400);
         } else {
@@ -104,5 +108,31 @@ public class SocialMediaController {
         }
 
     }
+    private void deleteMessageByMessageIdHandler(Context context) {
+        int messageId = Integer.parseInt(context.pathParam("message_id"));
+        Message deletedMessage = messageService.deleteMessageByMessageId(messageId);
+        if (deletedMessage != null) {
+            context.json(deletedMessage);
+        } else {
+            context.status(200);
+        }
+    }
+    private void updateMessageByMessageIdHandler(Context context) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        Message message = mapper.readValue(context.body(), Message.class);
+        int messageId = Integer.parseInt(context.pathParam("message_id"));
+        Message updatedMessage = messageService.updateMessageByMessageId(messageId, message);
+        if (updatedMessage != null) {
+            context.json(mapper.writeValueAsString(updatedMessage));
+        } else {
+            context.status(400);
+        }
+
+    }
+    private void getAllMessagesByParticularUser(Context context) {
+        int accountId = Integer.parseInt(context.pathParam("account_id"));
+        context.json(messageService.getAllMessagesByAccount(accountId));
+    }
+
 
 }
